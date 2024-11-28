@@ -26,13 +26,12 @@ jobs:
         mkdir -p dist
         cp index.html dist/index.html
 
-    - name: Deploy to GitHub Pages (Develop)
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: dist
-        destination_dir: develop
-
+    - name: Deploy to Netlify (Develop)
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_DEVELOP }}
+      run: |
+        npx netlify deploy --prod --dir=dist
     - name: Run Database Migrations (Develop)
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL_DEVELOP }}
