@@ -1,0 +1,40 @@
+name: Deploy Develop
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build HTML
+      run: |
+        mkdir -p dist
+        cp index.html dist/index.html
+
+    - name: Deploy to GitHub Pages (Develop)
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: dist
+        destination_dir: develop
+
+    - name: Run Database Migrations (Develop)
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL_DEVELOP }}
+      run: |
+        npx prisma migrate deploy --schema=prisma/schema.prisma
