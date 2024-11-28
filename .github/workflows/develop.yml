@@ -13,27 +13,18 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
-
-    - name: Install Dependencies
-      run: npm install
-
-    - name: Build HTML
-      run: |
-        mkdir -p dist
-        cp index.html dist/index.html
-
     - name: Deploy to Netlify (Develop)
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_DEVELOP }}
       run: |
-        npx netlify deploy --prod --dir=dist
-    - name: Run Database Migrations (Develop)
+        echo "Deploying to Netlify (Develop)..."
+        curl -X POST -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
+             "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/builds"
+
+    - name: Update Database (Develop)
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL_DEVELOP }}
       run: |
+        echo "Running database migrations (Develop)..."
         npx prisma migrate deploy --schema=prisma/schema.prisma
