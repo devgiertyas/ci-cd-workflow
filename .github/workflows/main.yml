@@ -1,0 +1,43 @@
+name: Deploy Main
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed # uando o PR é fechado
+
+  schedule:
+    - cron: '0 0 * * *' # Agendado para 21:00 BRT
+
+jobs:
+  schedule-check:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Triggered by Pull Request Merge
+      run: |
+        echo "Pull request approved and merged to main. Deploy scheduled for 21:00 BRT."
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Netlify (Main)
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_MAIN }}
+      run: |
+        echo "Deploying to Netlify (Main)..."
+        curl -X POST -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
+             "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/builds"
+
+    - name: Update Database (Main)
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL_MAIN }}
+      run: |
+        echo "Running database migrations (Main)..."
+        npx prisma migrate deploy --schema=prisma/schema.prisma
