@@ -11,3 +11,8 @@ model usuario {
   id   Int    @id @default(autoincrement())
   nome String
 }
+
+model pessoa {
+  id Int @id @default(autoincrement())
+  nome String
+}
